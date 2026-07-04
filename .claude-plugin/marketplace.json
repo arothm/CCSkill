@@ -1,0 +1,22 @@
+{
+  "name": "ccskill",
+  "owner": {
+    "name": "arothm",
+    "email": "you@example.com"
+  },
+  "metadata": {
+    "description": "Personal Claude skills marketplace.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "code-review-fleet",
+      "description": "Orchestrate a fleet of specialized review subagents (frontend/backend test, cleanup, e2e, design, migration, security, docs, deploy) over a codebase, coordinated through one shared memory, and merge findings into one prioritized report with approval-gated fixes.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/code-review-fleet"
+      ]
+    }
+  ]
+}
