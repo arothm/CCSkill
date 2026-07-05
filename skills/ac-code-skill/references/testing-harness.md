@@ -1,10 +1,12 @@
 # Testing harness — shared playbook for all test agents
 
-Every testing agent (`frontend-test`, `frontend-e2e`, `frontend-designer`,
-`backend-test`, `backend-e2e`, `security-test`) follows this playbook so they
-verify with real evidence instead of reasoning about the code, stay
-zero-dependency, and don't reinvent the same plumbing each run. It adapts the
-patterns proven by Anthropic's `webapp-testing` skill to the fleet's principles.
+The harness-using agents follow this playbook so they verify with real evidence
+instead of reasoning about the code, stay zero-dependency, and don't reinvent the
+same plumbing each run: `tester` (all functional testing — unit/integration/e2e,
+build, type-check) uses it in full; `frontend` uses the browser/viewport part for
+responsive & color checks; `security` uses the scanner part; `ai-engineer` uses
+it to run evals. It adapts the patterns proven by Anthropic's `webapp-testing`
+skill to the fleet's principles.
 
 ## Policy 1 — Prefer the project's own runner; generate ad-hoc only as fallback
 
@@ -62,10 +64,10 @@ Is the target static HTML?
        └─ Yes → navigate → wait for network idle → screenshot/inspect → act
 ```
 
-## Policy 4 — Capture evidence to `.fleet/log/<run-id>/`
+## Policy 4 — Capture evidence to `.ac-code-skill/log/<run-id>/`
 
 "Never assume" means your claims should be backed by artifacts the user can
-open. For each run, save into `.fleet/log/<run-id>/` (git-ignored):
+open. For each run, save into `.ac-code-skill/log/<run-id>/` (git-ignored):
 
 - **Screenshots** at the relevant states (and, for the designer, one per
   breakpoint).
@@ -73,7 +75,7 @@ open. For each run, save into `.fleet/log/<run-id>/` (git-ignored):
 - **Scanner output** (from `scripts/run_scanners.py`) for the security agent.
 
 Reference the artifact path in the finding, e.g. `Fix: … (see
-.fleet/log/<run-id>/checkout-500.png)`. A finding with an artifact is verified;
+.ac-code-skill/log/<run-id>/checkout-500.png)`. A finding with an artifact is verified;
 one without is, at best, "likely."
 
 ## Policy 5 — Cache harness facts in memory
@@ -94,7 +96,7 @@ none.
 
 ## Security-specific: the scanner runner
 
-`security-test` uses `scripts/run_scanners.py` (stdlib only, installs nothing).
+`security` uses `scripts/run_scanners.py` (stdlib only, installs nothing).
 It detects which scanners are already on PATH (`npm audit`, `pip-audit`,
 `cargo audit`, `osv-scanner`, `semgrep`, `bandit`, `gitleaks`, `trufflehog`),
 runs the ones that fit the repo, and prints a normalized summary to triage.

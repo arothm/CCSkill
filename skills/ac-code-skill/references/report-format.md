@@ -23,19 +23,26 @@ Findings:
 Memory delta:
 - <durable fact worth persisting — a convention, a working command, a recurring
   issue class. Omit transient run output. Empty is fine if nothing new.>
+
+Improvements:
+- <optional: a refinement to how THIS agent should work next time — see
+  shared-rules.md rule 5. The coordinator files these under Agent learnings.>
 ```
 
 The **Memory delta** is how each agent feeds the shared memory without writing
-it directly. The coordinator collects deltas from all agents and consolidates
-them into `.fleet/memory.md` (single writer — see `memory.md`). Keep deltas
-durable and terse; per-run findings belong in the report, not in memory.
+it directly. The **Improvements** block is how each agent feeds the
+self-improvement store. The coordinator collects both from all agents and
+consolidates them into `.ac-code-skill/memory.md` (single writer — see
+`memory.md`). Keep them durable and terse; per-run findings belong in the
+report, not in memory.
 
 ## The merged report (you write this)
 
-Save as `code-review-report.md` in the working directory. Use this template:
+Save as `.ac-code-skill/log/<run-id>/report.md` (and show the summary inline to
+the user). Use this template:
 
 ```markdown
-# Code Review Fleet — Report
+# AC Code Skill — Review Report
 
 **Verdict:** <PASS / NEEDS WORK / BLOCKED>
 **Counts:** N blocking · M warnings · K nits
@@ -57,5 +64,20 @@ Save as `code-review-report.md` in the working directory. Use this template:
 - backend tests: <pass/fail + summary>
 - linters/type-checkers: <summary>
 
+## Dependency & dead-code health
+- Outdated / EOL / advisory deps: <summary + which agent found them>
+- Confirmed-unused deps / dead code / dead files / dead folders: <summary>
+
 ## Suggested fix batches
-1. <batch the user can approve as a unit, e.g. "auto-form
+1. <batch the user can approve as a unit, e.g. "auto-formatting only">
+2. <e.g. "the 3 null-check bugs">
+3. <e.g. "the 2 security fixes — behavioral, confirm each">
+
+## Docs
+- Generated/updated at `.ac-code-skill/docs/`: <which docs>.
+```
+
+**Merge — don't staple.** Lead with the verdict and counts; group findings by
+severity, *not* by agent; deduplicate shared root causes into one entry that
+lists the agents that saw it; keep `file:line` + a concrete fix on every line.
+The point of the fleet is one coherent report, not a pile of per-agent outputs.

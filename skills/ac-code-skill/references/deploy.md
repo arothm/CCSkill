@@ -1,4 +1,4 @@
-# vps-deploy runbook
+# devops / deploy runbook
 
 The deploy agent is authorized for **full auto-deploy** — it runs the whole
 pipeline without stopping for routine approval. That authorization is only safe
@@ -12,7 +12,7 @@ review and fix phases, and never concurrently with the read-only agents.
 
 ## Where deploy facts come from
 
-Read `.fleet/memory.md` → "Infra & deploy" for the host, OS, deploy method,
+Read `.ac-code-skill/memory.md` → "Infra & deploy" for the host, OS, deploy method,
 health-check URL, and rollback method. If those aren't recorded yet, discover
 them (deploy scripts, CI config, `Dockerfile`/compose, `Procfile`, systemd
 units, `fly.toml`/`vercel.json`/etc.) and write them back as a memory delta so
@@ -29,7 +29,7 @@ memory — only where they come from (env, vault, CI secrets).
   security finding that hasn't been resolved, do not deploy — surface it and
   stop. Full auto-deploy covers routine shipping, not shipping a known
   vulnerability to a live server.
-- **Migration gate:** if `migration-review` flagged a confirmed destructive or
+- **Migration gate:** if the `backend` agent's migration-safety review flagged a confirmed destructive or
   irreversible migration (no working rollback, data-losing op) that hasn't been
   approved, do not deploy — surface it and stop. This pairs with the destructive-
   action carve-out below: a migration you can't undo is exactly the kind of
@@ -76,4 +76,22 @@ same auto/rollback discipline):
 - **Reboot required:** e.g. `/var/run/reboot-required`.
 
 Apply routine, low-risk updates as part of auto-deploy; but a kernel upgrade or
-anything requiring a reboot of a live server is
+anything requiring a reboot of a live server is a **destructive/irreversible
+action** — surface it, state the impact, and wait for explicit human approval
+before applying. Never reboot a live server on your own initiative.
+
+## Destructive-action carve-out
+
+Full auto-deploy authorization stops at anything you cannot cleanly undo:
+dropping data, an irreversible migration, a live-server reboot, deleting a
+release you can't restore. For those, do the verification and prep, then **stop
+and ask** — report exactly what you would run and why, and proceed only on
+explicit approval. Everything with a proven rollback path stays fully automatic.
+
+## Deploy report → memory
+
+After the deploy phase, hand the coordinator a Memory delta for the "Infra &
+deploy" section: confirmed host/OS, deploy method, health-check URL, rollback
+method, and any server-maintenance state (pending patches, cert expiry, reboot
+required). This is what lets the next deploy skip rediscovery. Record locations
+and methods, never secret values.

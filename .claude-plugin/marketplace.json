@@ -10,12 +10,12 @@
   },
   "plugins": [
     {
-      "name": "code-review-fleet",
-      "description": "Orchestrate a fleet of specialized review subagents (frontend/backend test, cleanup, e2e, design, migration, security, docs, deploy) over a codebase, coordinated through one shared memory, and merge findings into one prioritized report with approval-gated fixes.",
+      "name": "ac-code-skill",
+      "description": "Orchestrate a fleet of seven role-shaped subagents (Frontend, Backend, Cyber Security, Tester, DevOps, Docs, and an AI Agent Engineer for AI/LLM repos) over a codebase, coordinated through one shared memory plus living docs. Agents read the full state each run, check for outdated/dead dependencies and dead code, and self-improve. Docs auto-generate after review and update after fixes; fixes are approval-gated; deploys auto-run with rollback. 'run ac-code-skill' runs the whole pipeline in one prompt, and an empty repo triggers a from-scratch interview.",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/code-review-fleet"
+        "./skills/ac-code-skill"
       ]
     }
   ]

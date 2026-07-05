@@ -4,7 +4,7 @@ this repo, printing a normalized summary. Standard library only — installs
 nothing. If a scanner isn't present it's skipped and noted (never guessed at).
 
 Black-box helper: run with --help, then invoke. Don't read this source unless a
-customized run is truly needed. It exists so the security-test agent runs
+customized run is truly needed. It exists so the security agent runs
 whatever the environment already has, consistently, without hand-rolling each
 invocation or bloating context.
 

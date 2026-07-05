@@ -5,6 +5,15 @@ frontend vs backend, and — most importantly — the *actual* commands the proj
 uses to test, lint, type-check, and build. Never hardcode a command; read it
 from the project's own config so the agents run what CI runs.
 
+## 0. Empty repo → greenfield, not detection
+
+Before detecting anything, check whether there's anything to detect. If the repo
+has no source beyond a README/LICENSE/`.gitignore` (no signal files below, no
+`src`), or the user says they want to start from scratch, **stop detection and
+hand back to the coordinator's greenfield bootstrap** (SKILL.md) — the fleet
+interviews the user and scaffolds instead of reviewing an empty tree. Everything
+below assumes there's existing code.
+
 ## 1. Find the subprojects
 
 Start by listing the repo root and looking one or two levels deep for the signal
@@ -37,6 +46,14 @@ For a `package.json`, read `dependencies`/`devDependencies`:
 Python/Go/Rust/Java/Ruby/PHP subprojects are backend by default. A repo can be
 frontend-only, backend-only, or both — plan agents accordingly.
 
+**AI/LLM signals** (decides whether to include the `ai-engineer` agent): SDKs
+like `anthropic`, `openai`, `@anthropic-ai/sdk`, `google-generativeai`,
+`cohere`, `mistralai`; orchestration like `langchain`, `llamaindex`,
+`semantic-kernel`; local models via `transformers`/`ollama`; a vector DB
+(`pinecone`, `weaviate`, `qdrant`, `pgvector`, `chromadb`); or prompt/agent
+files (`*.prompt`, a `prompts/` dir, tool/function-calling schemas). If any are
+present, record "AI features: yes" in memory and include `ai-engineer`.
+
 ## 3. Extract the real commands
 
 Prefer commands the project already defines over generic ones.
@@ -66,7 +83,27 @@ if configured.
 exact commands the team trusts, and `pre-commit-config.yaml` for the lint/format
 tools they've standardized on.
 
-## 4. Determine review scope
+## 4. Inventory dependencies (feeds the dependency checks)
+
+While you have the manifests open, record what the dependency sweeps will need
+so they don't re-derive it:
+
+- **Manifests & lockfiles** — where they are, per subproject.
+- **The ecosystem's update/audit tooling** so `security` and the `frontend`/
+  `backend` agents use the real thing: `npm outdated` / `npm audit`, `pip list --outdated`
+  / `pip-audit`, `go list -m -u all` / `govulncheck`, `cargo outdated` /
+  `cargo audit`, `bundle outdated` / `bundler-audit`, etc.
+- **Unused-dependency detectors** if present: `depcheck`, `knip`, `ts-prune`
+  (JS/TS), `deptry`, `pip-autoremove` (Python), `cargo-udeps` (Rust),
+  `go mod tidy` (Go). If none is installed, agents fall back to grepping each
+  declared dependency name across the source.
+
+Write this into memory's *Dependencies* section. It's what lets `security`
+flag outdated/EOL/advisory packages and the `frontend`/`backend` agents flag
+declared-but-never-imported dependencies, without every run rediscovering the
+toolchain.
+
+## 5. Determine review scope
 
 - **Diff scope** (default for pre-commit/pre-merge): `git status --porcelain`
   for uncommitted work, or `git diff --name-only <base>...HEAD` (base is usually
