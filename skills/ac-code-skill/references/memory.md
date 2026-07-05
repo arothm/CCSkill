@@ -26,6 +26,16 @@ run if it isn't there).
 (regenerated after review and again after fixes — see cadence). `log/` is the
 per-run history (useful for diffing runs and debugging, safe to prune).
 
+**Run-id naming.** Use `<date>-<kind><n>` so the log tells you what the run *was*
+— `20260705-review2` for a review pass, `20260705-cycle1` for a full
+review→fix→deploy cycle. Don't keep calling a run `reviewN` after it grew into a
+fix/deploy cycle; the id should match the work.
+
+**Migrating an older workspace.** If a pre-rename `.fleet/` directory exists,
+migrate its `memory.md` into `.ac-code-skill/` on first run and **remove the old
+`.fleet/`** — leaving both behind means two memories drift apart and agents can
+read the stale one.
+
 ## The single-writer rule (why agents don't write memory directly)
 
 Agents run in parallel. If several append to `memory.md` at once, the file
@@ -82,6 +92,14 @@ lean and true:
   changed, a convention moved), replace the old line rather than appending a
   contradiction. When two facts conflict, the newer verified one wins — and note
   it, so agents don't re-flag the resolved question.
+- **Reconcile status across sections, every write.** A later phase changes state
+  that earlier sections asserted: after fixes, a finding is no longer "present";
+  after deploy, the tree is no longer "not yet deployed." Before finishing a
+  write, scan the *whole* file for status lines an earlier phase left behind and
+  update them — status (deployed / fixed / present / resolved) must read the same
+  everywhere. The single-writer's job is one coherent snapshot, not an append log;
+  two sections disagreeing on the same fact is a defect, and it silently erodes
+  trust in memory over many runs.
 - **Prune stale entries.** If a fact no longer matches the code (verify before
   deleting), remove it. Stale memory is worse than no memory because agents
   trust it.

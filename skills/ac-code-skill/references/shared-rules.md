@@ -25,6 +25,12 @@ something you must be able to point at.
 - **Trace to root cause.** A failing test with a wrong expected value and a
   failing test that caught a real bug look identical until you read the code.
   Do the read. Shallow pattern-matching is the thing this rule forbids.
+- **Re-verify carried findings from current source.** When re-confirming a
+  finding from a prior run, re-derive its behavior from the code as it is *now* —
+  a refactor may have already fixed it, moved it, or inverted the line ordering,
+  so the old `file:line` wording goes stale. Trust the current source, not the
+  previous run's description of it; confirm the issue still reproduces before you
+  carry it forward, and mark it resolved if it doesn't.
 
 ## 2. Save tokens — without losing depth
 
