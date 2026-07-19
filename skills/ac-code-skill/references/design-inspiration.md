@@ -55,6 +55,19 @@ dashboard shell, nav) instead of inventing one. It is designed to be copied —
 still **confirm the current license** and keep attribution where required, and
 restyle to the project's own tokens so it doesn't look stock.
 
+### 3a. Choosing the animation library
+The generator recommends one from `data/motion-libraries.csv` based on the style's
+motion character and your `--stack`: **CSS transitions** and the **View
+Transitions API** (zero dependency), **Motion** — formerly Framer Motion, MIT,
+React/Vue/vanilla — for declarative app UI, layout and exit animations,
+**GSAP** for scroll-driven timelines and SVG morphing, **AutoAnimate** for list
+changes, **react-spring** for physics, **Lottie** for designer-authored set
+pieces, and **R3F/Three.js** for genuine 3D. Each row carries weight, the
+`prefers-reduced-motion` approach, SSR notes, and licence. **Cheapest option
+that expresses the idea wins** — a dependency must earn its bytes against the
+performance budget, and weight figures are tiers to verify against the release
+you actually install, not quoted facts.
+
 ### 3. GSAP (`gsap.com`) — motion technique
 The professional animation library, plus plugins: **ScrollTrigger** (scroll-driven
 sequences), **ScrollSmoother**, **SplitText** (per-character/word reveals),
@@ -82,7 +95,8 @@ python scripts/design_system.py "<brief>" --persist -o .ac-code-skill   # design
 python scripts/design_system.py "<brief>" --page checkout -o .ac-code-skill
 python scripts/design_system.py --validate      # dataset gate; non-zero exit on failure (offline)
 python scripts/design_system.py --validate --check-fonts   # + probe providers for the families
-python scripts/design_system.py --list styles   # or palettes | fonts | products
+python scripts/design_system.py "<brief>" --stack react   # stack-aware motion-library pick
+python scripts/design_system.py --list styles   # or palettes | fonts | products | motion
 ```
 
 It draws on bundled datasets (`data/styles.csv`, `palettes.csv`,

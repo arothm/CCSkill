@@ -125,7 +125,29 @@ def pick(query, priority_ids, table, extra_field="keywords"):
 
 
 # -------------------------------------------------------------------- compose
-def compose(query, products, styles, palettes, fonts, overrides=None):
+def pick_motion(style, motions, stack=None, forced=None):
+    """Choose an animation library from the style's preference order, filtered by stack.
+
+    Motion choice is a real performance decision, so the generator makes it
+    explicitly rather than leaving the agent to guess a dependency's cost.
+    """
+    mtab = by_id(motions)
+    if forced and forced in mtab:
+        return mtab[forced]
+    ids = [i.strip() for i in ((style or {}).get("motion_priority") or "").split(",")
+           if i.strip() and i.strip() in mtab]
+    if not ids:
+        return None
+    if stack:
+        s = stack.lower().strip()
+        fits = [i for i in ids
+                if s in normalise(mtab[i]["stacks"]).split() or mtab[i]["stacks"].strip() == "all"]
+        if fits:
+            return mtab[fits[0]]
+    return mtab[ids[0]]
+
+
+def compose(query, products, styles, palettes, fonts, overrides=None, motions=None, stack=None):
     overrides = overrides or {}
     pdocs = [(r["id"], f"{r['product']} {r['keywords']} {r['pattern']}") for r in products]
     pscore = bm25(query, pdocs)
@@ -151,6 +173,8 @@ def compose(query, products, styles, palettes, fonts, overrides=None):
         "key_effects": rule["key_effects"],
         "anti_patterns": [a.strip() for a in rule["anti_patterns"].split(",")],
         "severity": rule["severity"],
+        "motion_lib": pick_motion(style, motions or [], stack, overrides.get("motion")),
+        "stack": stack,
     }
 
 
@@ -216,6 +240,26 @@ def render_markdown(spec):
             out += ["", "```css", f"@import url('{f['import_url']}');", f"/* stack */ font-family: {f['css_stack']};", "```", ""]
         else:
             out += ["", "```css", f"/* no import needed */ font-family: {f['css_stack']};", "```", ""]
+    m = spec.get("motion_lib")
+    if m:
+        out += ["## Motion", ""]
+        if s:
+            out.append(f"**Character:** {s['motion']}")
+        out += ["", f"**Recommended library:** {m['name']}"
+                + (f" — `{m['package']}`" if m["package"] not in ("none", "") else " (no dependency)"),
+                "",
+                f"- **Weight:** {m['weight_tier']} — {m['weight_note']}",
+                f"- **Stacks:** {m['stacks']}" + (f"  _(selected for: {spec['stack']})_" if spec.get("stack") else ""),
+                f"- **Strengths:** {m['strengths']}",
+                f"- **Best for:** {m['best_for']}",
+                f"- **Do NOT reach for it when:** {m['avoid_when']}",
+                f"- **Reduced motion:** {m['reduced_motion']}",
+                f"- **SSR:** {m['ssr_notes']}",
+                f"- **Licence:** {m['license']}",
+                "",
+                "_Cheaper option first: if a CSS transition expresses the idea, use it — "
+                "an animation dependency must earn its bytes against the performance budget._",
+                ""]
     out += ["## Key effects", spec["key_effects"], ""]
     out += ["## Anti-patterns — do NOT do these"] + [f"- {a}" for a in spec["anti_patterns"]] + [""]
     out += ["## Pre-delivery checklist"] + [f"- [ ] {c}" for c in checklist(spec)] + [""]
@@ -285,8 +329,19 @@ def check_fonts_online(fonts, timeout=10):
     return failures, skipped, checked
 
 
-def validate(styles, palettes, fonts, products, check_online=False):
+def validate(styles, palettes, fonts, products, motions=None, check_online=False):
+    motions = motions or []
     failures, checks = [], 0
+
+    mtab = by_id(motions)
+    for s in styles:
+        refs = [x.strip() for x in (s.get("motion_priority") or "").split(",") if x.strip()]
+        if not refs:
+            failures.append(f"REF       style {s['id']}: no motion_priority set")
+        for ref in refs:
+            checks += 1
+            if ref not in mtab:
+                failures.append(f"REF       style {s['id']}: motion library '{ref}' does not exist")
 
     for p in palettes:
         for fg, bg, label in PAIRS:
@@ -331,7 +386,7 @@ def validate(styles, palettes, fonts, products, check_online=False):
             net_note += f" SKIPPED (unreachable, not a failure): {', '.join(skipped)}."
 
     print(f"Validated {checks} checks across {len(palettes)} palettes, {len(fonts)} font pairings, "
-          f"{len(styles)} styles, {len(products)} product rules.{net_note}")
+          f"{len(styles)} styles, {len(products)} product rules, {len(motions)} motion libraries.{net_note}")
     if failures:
         print(f"\n{len(failures)} FAILURE(S):")
         for x in failures:
@@ -371,6 +426,9 @@ def main(argv=None):
     ap.add_argument("--style", help="force a style id")
     ap.add_argument("--palette", help="force a palette id")
     ap.add_argument("--font", help="force a font-pairing id")
+    ap.add_argument("--motion", help="force a motion-library id")
+    ap.add_argument("--stack", help="target stack (react, nextjs, vue, svelte, vanilla...) - "
+                                    "filters the motion-library recommendation")
     ap.add_argument("--persist", action="store_true", help="write design-system/MASTER.md")
     ap.add_argument("--page", help="write a page override into design-system/pages/")
     ap.add_argument("--output-dir", "-o", default=".", help="where design-system/ is created")
@@ -378,13 +436,15 @@ def main(argv=None):
     ap.add_argument("--check-fonts", action="store_true",
                     help="ALSO probe each font import URL online to confirm the provider really serves "
                          "those families (opt-in; needs network; unreachable = skipped, not failed)")
-    ap.add_argument("--list", choices=["styles", "palettes", "fonts", "products"], help="list available ids")
+    ap.add_argument("--list", choices=["styles", "palettes", "fonts", "products", "motion"],
+                    help="list available ids")
     a = ap.parse_args(argv)
 
     styles, palettes, fonts, products = load("styles"), load("palettes"), load("font-pairings"), load("product-rules")
+    motions = load("motion-libraries")
 
     if a.validate:
-        return validate(styles, palettes, fonts, products, check_online=a.check_fonts)
+        return validate(styles, palettes, fonts, products, motions, check_online=a.check_fonts)
     if a.check_fonts:
         nf, skipped, nchecked = check_fonts_online(fonts)
         print(f"Probed {nchecked} font import URL(s).")
@@ -398,17 +458,19 @@ def main(argv=None):
         print("All probed families are served by their declared provider.")
         return 0
     if a.list:
-        key = {"styles": ("styles", "style"), "palettes": ("palettes", "name"),
-               "fonts": ("font-pairings", "name"), "products": ("product-rules", "product")}[a.list]
-        rows = {"styles": styles, "palettes": palettes, "fonts": fonts, "products": products}[a.list]
+        field = {"styles": "style", "palettes": "name", "fonts": "name",
+                 "products": "product", "motion": "name"}[a.list]
+        rows = {"styles": styles, "palettes": palettes, "fonts": fonts,
+                "products": products, "motion": motions}[a.list]
         for r in rows:
-            print(f"{r['id']:<24} {r[key[1]]}")
+            print(f"{r['id']:<24} {r[field]}")
         return 0
     if not a.query:
         ap.error("give a brief, or use --validate / --list")
 
     spec = compose(a.query, products, styles, palettes, fonts,
-                   {"style": a.style, "palette": a.palette, "font": a.font})
+                   {"style": a.style, "palette": a.palette, "font": a.font, "motion": a.motion},
+                   motions=motions, stack=a.stack)
 
     if a.persist or a.page:
         print("wrote " + persist(spec, a.output_dir, a.page))

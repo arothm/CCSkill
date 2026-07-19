@@ -56,7 +56,9 @@ output.
 - **Design system generation** — `design_system.py "premium minimal SaaS landing
   page"` composes a concrete spec from bundled datasets: layout pattern, style,
   colour tokens as CSS variables with a **measured** WCAG ratio on every pair,
-  typography with the correct provider import, anti-patterns, and a checklist.
+  typography with the correct provider import, a stack-aware motion-library pick
+  (CSS / View Transitions / Motion / GSAP / …, cheapest-that-works first with its
+  weight, reduced-motion story and licence), anti-patterns, and a checklist.
   Persists as `design-system/MASTER.md` plus per-page overrides. `--validate`
   gates the dataset itself — contrast, font-import coherence, referential
   integrity — so it can't ship an unreadable palette or a font it never imported;
@@ -130,7 +132,8 @@ skills/ac-code-skill/
 │   ├── styles.csv                 #   13 styles: best-for, avoid-for, effects, a11y risk
 │   ├── palettes.csv               #   14 palettes, every token pair contrast-checked
 │   ├── font-pairings.csv          #   13 pairings w/ provider + matching import URL
-│   └── product-rules.csv          #   20 product types → pattern, style, anti-patterns
+│   ├── product-rules.csv          #   20 product types → pattern, style, anti-patterns
+│   └── motion-libraries.csv       #   8 animation options: weight, reduced-motion, SSR, licence
 └── scripts/
     ├── with_server.py             # stdlib server-lifecycle helper (black box)
     ├── run_scanners.py            # stdlib security-scanner runner (black box)

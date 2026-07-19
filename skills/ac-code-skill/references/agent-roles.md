@@ -137,7 +137,10 @@ or build step references it.
 > concrete spec from the bundled verified datasets — layout pattern + section
 > order, style with its do-not-use-for list, colour tokens as CSS variables with a
 > **measured** WCAG ratio on every pair, typography with the *correct provider
-> import*, key effects, anti-patterns, and a pre-delivery checklist. Persist it
+> import*, a **motion-library recommendation** (pass `--stack react|vue|svelte|…`
+> — it weighs CSS/View Transitions/Motion/GSAP/AutoAnimate/Lottie/R3F by weight,
+> reduced-motion story, SSR and licence, cheapest-that-works first), key effects,
+> anti-patterns, and a pre-delivery checklist. Persist it
 > with `--persist -o .ac-code-skill` (writes `design-system/MASTER.md`) and
 > `--page <name>` for per-page overrides that inherit from MASTER. Treat the
 > output as a **starting spec, not gospel** — it reports its own match confidence;
