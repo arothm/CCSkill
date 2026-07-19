@@ -252,7 +252,13 @@ compliance, testing bar, and deploy target. Record the answers in memory's
 
 1. Generate the initial docs (PRD/BRD/FDD/TDD, seed ADRs) into
    `.ac-code-skill/docs/` from the interview.
-2. Propose a concrete stack + scaffold plan and confirm it.
+2. Propose a concrete stack + scaffold plan and confirm it. When the brief is
+   **aesthetic** ("premium minimal", "editorial", "make it feel expensive"), the
+   `frontend` agent follows `references/design-inspiration.md` to turn the
+   adjective into concrete design vocabulary and a direction — calibrated against
+   catalogued reference libraries, then implemented originally in the project's
+   own tokens and stack (learn principles, never clone). Record the chosen
+   direction in memory so later runs stay consistent.
 3. On approval, scaffold the project (structure, tooling, CI, a running skeleton)
    and seed `memory.md` with the chosen stack and commands.
 

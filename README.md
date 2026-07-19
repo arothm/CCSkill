@@ -53,6 +53,11 @@ output.
   dependencies, and dead code/files/folders are swept every run.
 - **Greenfield bootstrap** — an empty repo triggers a per-role intake interview
   that turns your answers into docs and a scaffold.
+- **Aesthetic direction** — an adjective brief ("premium minimal", "editorial")
+  is translated into concrete design vocabulary and calibrated against catalogued
+  reference libraries (composition, components, motion, WebGL), then implemented
+  originally in your own tokens and stack — principles learned, never cloned, with
+  performance and accessibility budgets still binding.
 - **Zero external dependencies** — browser automation and security scanning use
   MCP connectors or tools you already have, with graceful fallbacks.
 
@@ -108,6 +113,7 @@ skills/ac-code-skill/
 │   ├── memory.md                  # .ac-code-skill/ shared-memory + docs protocol
 │   ├── stack-detection.md         # language-agnostic stack/command/AI detection
 │   ├── agent-roles.md             # every agent's principal-level brief
+│   ├── design-inspiration.md      # aesthetic direction: reference libraries + IP guardrails
 │   ├── testing-harness.md         # zero-dep testing playbook (MCP browser, evidence)
 │   ├── report-format.md           # agent output + merged report shape
 │   └── deploy.md                  # auto-deploy runbook + rollback + gates

@@ -132,6 +132,17 @@ or build step references it.
 > type transforms) where the codebase relies on it.
 > **Cross-platform:** call out PWA / WebAssembly / native-bridge (React Native,
 > Capacitor) concerns where the code reaches for them.
+> **Design sourcing & aesthetic direction (when building/restyling UI):** when the
+> ask is an aesthetic one ("premium minimal", "editorial", "make it feel
+> expensive"), follow `references/design-inspiration.md` — translate the adjective
+> into concrete vocabulary (type scale, palette size, whitespace ratio, motion
+> budget, one signature moment), calibrate against the catalogued reference
+> libraries at the right layer (composition / components / motion / WebGL), then
+> **implement originally in the project's own design tokens and stack**. Learn
+> principles, never clone a brand or paste unlicensed code; only claim you
+> inspected a live site if a browser MCP actually rendered it. Your CWV and WCAG
+> ownership still binds — performance budget, `prefers-reduced-motion`, and AA
+> contrast are not waived because an effect looks impressive.
 > Also run the **FE dead-code / dead-dependency sweep** (unused exports/components,
 > unreachable files, orphaned folders, npm deps never imported — `depcheck`/`knip`
 > /`ts-prune` if present, else grep). Confirm every issue by reading the code.

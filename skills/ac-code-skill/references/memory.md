@@ -134,6 +134,12 @@ _Last updated: <date> by coordinator (run <run-id>)_
 - State management, data flow, error-handling pattern, API/contract style.
 - Auth model, external services, feature flags.
 
+## Design direction (so restyles stay consistent)
+- Aesthetic: <e.g. premium minimal / editorial / dark technical> + the one feeling it must convey.
+- Type scale & families, palette (base + accent), spacing scale, max measure.
+- Motion budget + the single signature moment; reduced-motion path.
+- Reference layers consulted and what was *verified* vs assumed (see `design-inspiration.md`).
+
 ## Dependencies (verified)
 - Manifests & lockfiles: <where>. Update tool: <npm outdated / pip list -o / …>.
 - Known outdated / EOL / advisory-flagged deps: <...>.
