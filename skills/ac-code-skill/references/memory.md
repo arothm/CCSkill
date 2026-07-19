@@ -53,11 +53,22 @@ races and corrupts. So:
   deltas, deduplicates them against what's already there, and writes the updated
   `memory.md` (and regenerates `docs/`). Because only one process writes,
   there's no race.
-- **Privacy gate before persisting.** Before writing a delta, scan it for
-  secrets and PII (keys, tokens, emails, SSNs, customer data) and strip or
-  redact them — memory records *where* a secret comes from (env, vault), never
-  the value, and never personal data. Memory is a durable file every agent
-  reads; it must not become a place sensitive data leaks into.
+- **Privacy gate before persisting — enforced, not just intended.** Run every
+  delta (and the merged report, and generated docs) through
+  `python scripts/redact.py --strict` before it is written. The typed policy in
+  `data/pii-policy.csv` assigns each category an action: **BLOCK** (live
+  credentials, national IDs, card numbers — never persisted, `--strict` exits
+  non-zero), **REDACT** (home address, phone, personal email, DOB, private names,
+  geolocation, health data), **HASH** (internal hostnames/IPs — stays
+  correlatable across runs without publishing your topology), **PASS** (public
+  contacts, repo URLs, `file:line` paths — these must survive or findings stop
+  being reproducible).
+  **The tool only catches the pattern-detectable types.** Categories marked
+  `judgment` — a home address in free prose, a customer's name, health data —
+  cannot be regex-matched; `redact.py` lists them every run precisely so you
+  check them by hand. Memory is a durable file every agent reads, and a review
+  artefact is exactly where personal data should not accumulate: record *where* a
+  secret lives (env, vault) and *that* an address is exposed, never the value.
 
 ## Update cadence
 

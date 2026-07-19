@@ -46,9 +46,17 @@ output.
 - **Living docs as Word files** — PRD/BRD/FDD/TDD/ADR generated as `.docx` after
   review and refreshed again after fixes, so the documentation always matches the
   code.
-- **Shared memory + self-improvement** — every agent reads the full memory and
-  docs each run and feeds an *Agent learnings* store, so the fleet compounds
-  skill over time, not just knowledge.
+- **Retrieved memory + self-improvement** — agents pull only the relevant slice
+  of memory and docs (`recall.py`, typically a few percent of the corpus, and it
+  lists what it omitted rather than silently dropping it) and feed an *Agent
+  learnings* store, so the fleet compounds skill over time, not just knowledge.
+- **Enforced privacy gate** — a typed PII policy (BLOCK / REDACT / HASH / PASS)
+  runs over every memory write, report, and doc before it is persisted, so
+  credentials and personal data don't accumulate in review artefacts.
+- **Confirmed blocking findings** — nothing is reported `blocking` until a second
+  agent independently reproduces it; unconfirmed findings ship as warnings.
+- **Continuous mode (optional)** — recommended hooks prime memory at session
+  start, refuse a commit carrying a secret, and typecheck on edit.
 - **Dependency & dead-code hygiene** — outdated/EOL/advisory packages, unused
   dependencies, and dead code/files/folders are swept every run.
 - **Greenfield bootstrap** — an empty repo triggers a per-role intake interview
@@ -125,6 +133,7 @@ skills/ac-code-skill/
 │   ├── stack-detection.md         # language-agnostic stack/command/AI detection
 │   ├── agent-roles.md             # every agent's principal-level brief
 │   ├── design-inspiration.md      # aesthetic direction: reference libraries + IP guardrails
+│   ├── hooks.md                   # recommended Claude Code hooks for continuous mode
 │   ├── testing-harness.md         # zero-dep testing playbook (MCP browser, evidence)
 │   ├── report-format.md           # agent output + merged report shape
 │   └── deploy.md                  # auto-deploy runbook + rollback + gates
@@ -133,12 +142,15 @@ skills/ac-code-skill/
 │   ├── palettes.csv               #   14 palettes, every token pair contrast-checked
 │   ├── font-pairings.csv          #   13 pairings w/ provider + matching import URL
 │   ├── product-rules.csv          #   20 product types → pattern, style, anti-patterns
-│   └── motion-libraries.csv       #   8 animation options: weight, reduced-motion, SSR, licence
+│   ├── motion-libraries.csv       #   8 animation options: weight, reduced-motion, SSR, licence
+│   └── pii-policy.csv             #   18 PII types x BLOCK / REDACT / HASH / PASS
 └── scripts/
     ├── with_server.py             # stdlib server-lifecycle helper (black box)
     ├── run_scanners.py            # stdlib security-scanner runner (black box)
     ├── md_to_docx.py              # stdlib Markdown→Word (.docx) renderer (black box)
-    └── design_system.py           # stdlib design-system composer + --validate gate
+    ├── design_system.py           # stdlib design-system composer + --validate gate
+    ├── recall.py                  # stdlib retrieval over memory + docs (reads .docx too)
+    └── redact.py                  # stdlib PII gate applied before anything is persisted
 ```
 
 Runtime output in a target repo lives under `.ac-code-skill/` (gitignored):

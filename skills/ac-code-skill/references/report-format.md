@@ -57,7 +57,10 @@ the user). Use this template:
 **Scope:** <diff vs main | full repo> · **Agents:** <which ran>
 
 ## Blocking
-- **<short title>** — `file:line` (from: <agent>)
+_Every entry here was independently confirmed by a second agent (shared-rules
+rule 1). Anything one agent found but another couldn't reproduce belongs in
+Warnings, labelled "single-agent, unconfirmed"._
+- **<short title>** — `file:line` (from: <agent>, confirmed by: <second agent>)
   <problem>. **Fix:** <suggestion>.
 
 ## Warnings
@@ -96,6 +99,12 @@ rough ROI (impact ÷ effort). Advisory — implementing one is approval-gated._
 severity, *not* by agent; deduplicate shared root causes into one entry that
 lists the agents that saw it; keep `file:line` + a concrete fix on every line.
 The point of the fleet is one coherent report, not a pile of per-agent outputs.
+
+**Run the report through the privacy gate before saving it.** `python
+scripts/redact.py --in report.md --strict` — a review artefact is a durable file
+that gets shared, and it is exactly where a leaked credential or a real person's
+address should not end up (see `memory.md`). Keep `file:line` paths and public
+URLs; they're PASS-classed so findings stay reproducible.
 
 **Keep enhancements out of the defect counts.** The verdict and blocking/warning/
 nit counts are about *defects only* — an enhancement is never a `blocking`. Rank

@@ -22,6 +22,12 @@ something you must be able to point at.
 - **When you can't verify, say that** instead of filling the gap with a
   plausible guess. "Couldn't run the suite — Postgres isn't reachable" is a
   finding. A fabricated pass/fail is a liability.
+- **A `blocking` finding needs a second pair of eyes.** Before anything is
+  reported at blocking severity, a **different agent** (one already in the run —
+  the fleet stays seven roles) must independently re-derive it from the source
+  and agree. If the second agent can't reproduce it, it ships as a `warning`
+  labelled "single-agent, unconfirmed" rather than blocking. Blocking findings
+  stop merges and deploys, so they carry the highest cost of being wrong.
 - **Trace to root cause.** A failing test with a wrong expected value and a
   failing test that caught a real bug look identical until you read the code.
   Do the read. Shallow pattern-matching is the thing this rule forbids.
@@ -62,12 +68,17 @@ All agents share one persistent memory *and* one set of living docs so knowledge
 compounds across runs and across the fleet. See `memory.md` for the full
 protocol; the essentials:
 
-- **At start, read both** `.ac-code-skill/memory.md` **and everything in**
-  `.ac-code-skill/docs/`. Together they are your project briefing: memory is the
-  terse fact base, the docs are the current intended design and requirements.
-  Treat them as trusted-but-verifiable context (still confirm anything you act
-  on, per rule 1, but don't re-discover it from scratch). Every agent reads the
-  full current state on every run so no agent works against a stale picture.
+- **At start, RETRIEVE the relevant context — don't bulk-load it.** Run
+  `python scripts/recall.py "<what you're about to work on>" --root .ac-code-skill
+  --role <your role>`. It returns the always-pinned core (project overview, stack
+  & commands, testing harness, dependencies, open questions, your role's *Agent
+  learnings*) plus the sections that actually match your task, and it **lists
+  everything it left out** so you can ask for a section by name. Memory and docs
+  grow without bound; on a mature repo, every agent reading every byte is the
+  single largest source of waste (rule 2) — retrieval typically returns a few
+  percent of the corpus with no loss of the facts you need. Treat what comes back
+  as trusted-but-verifiable (still confirm anything you act on, per rule 1). If
+  `recall.py` is unavailable, fall back to reading `memory.md` directly.
 - **Do NOT write `memory.md` or the docs directly.** Agents run in parallel;
   concurrent writes to one file corrupt it. Instead, end your report with a
   short **Memory delta** — the durable facts worth persisting (a newly
