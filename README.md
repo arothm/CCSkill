@@ -53,6 +53,13 @@ output.
   dependencies, and dead code/files/folders are swept every run.
 - **Greenfield bootstrap** — an empty repo triggers a per-role intake interview
   that turns your answers into docs and a scaffold.
+- **Design system generation** — `design_system.py "premium minimal SaaS landing
+  page"` composes a concrete spec from bundled datasets: layout pattern, style,
+  colour tokens as CSS variables with a **measured** WCAG ratio on every pair,
+  typography with the correct provider import, anti-patterns, and a checklist.
+  Persists as `design-system/MASTER.md` plus per-page overrides. `--validate`
+  gates the dataset itself — contrast, font-import coherence, referential
+  integrity — so it can't ship an unreadable palette or a font it never imported.
 - **Aesthetic direction** — an adjective brief ("premium minimal", "editorial")
   is translated into concrete design vocabulary and calibrated against catalogued
   reference libraries (composition, components, motion, WebGL), then implemented
@@ -117,10 +124,16 @@ skills/ac-code-skill/
 │   ├── testing-harness.md         # zero-dep testing playbook (MCP browser, evidence)
 │   ├── report-format.md           # agent output + merged report shape
 │   └── deploy.md                  # auto-deploy runbook + rollback + gates
+├── data/                          # verified design datasets (self-validating)
+│   ├── styles.csv                 #   13 styles: best-for, avoid-for, effects, a11y risk
+│   ├── palettes.csv               #   14 palettes, every token pair contrast-checked
+│   ├── font-pairings.csv          #   13 pairings w/ provider + matching import URL
+│   └── product-rules.csv          #   20 product types → pattern, style, anti-patterns
 └── scripts/
     ├── with_server.py             # stdlib server-lifecycle helper (black box)
     ├── run_scanners.py            # stdlib security-scanner runner (black box)
-    └── md_to_docx.py              # stdlib Markdown→Word (.docx) renderer (black box)
+    ├── md_to_docx.py              # stdlib Markdown→Word (.docx) renderer (black box)
+    └── design_system.py           # stdlib design-system composer + --validate gate
 ```
 
 Runtime output in a target repo lives under `.ac-code-skill/` (gitignored):

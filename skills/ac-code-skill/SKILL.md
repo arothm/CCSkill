@@ -254,11 +254,14 @@ compliance, testing bar, and deploy target. Record the answers in memory's
    `.ac-code-skill/docs/` from the interview.
 2. Propose a concrete stack + scaffold plan and confirm it. When the brief is
    **aesthetic** ("premium minimal", "editorial", "make it feel expensive"), the
-   `frontend` agent follows `references/design-inspiration.md` to turn the
-   adjective into concrete design vocabulary and a direction — calibrated against
-   catalogued reference libraries, then implemented originally in the project's
-   own tokens and stack (learn principles, never clone). Record the chosen
-   direction in memory so later runs stay consistent.
+   `frontend` agent runs `scripts/design_system.py "<brief>" --persist -o
+   .ac-code-skill` to compose a verified design system (pattern, style, colour
+   tokens with **measured** WCAG ratios, typography with the correct import,
+   anti-patterns, checklist) into `.ac-code-skill/design-system/MASTER.md`, with
+   `--page <name>` overrides inheriting from it. It then applies
+   `references/design-inspiration.md` for taste calibration — implemented
+   originally in the project's own tokens and stack (learn principles, never
+   clone). Record the chosen direction in memory so later runs stay consistent.
 3. On approval, scaffold the project (structure, tooling, CI, a running skeleton)
    and seed `memory.md` with the chosen stack and commands.
 

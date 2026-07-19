@@ -71,8 +71,37 @@ hero moment* when the brief genuinely calls for spectacle. Read the tool's expor
 terms before shipping generated code, and see the performance guardrail below —
 this is the single easiest way to destroy a page's Core Web Vitals.
 
+## The generator comes first
+
+Before reasoning from scratch, run the bundled composer — it turns a brief into a
+concrete, self-verified spec in one command:
+
+```bash
+python scripts/design_system.py "premium minimal SaaS landing page"
+python scripts/design_system.py "<brief>" --persist -o .ac-code-skill   # design-system/MASTER.md
+python scripts/design_system.py "<brief>" --page checkout -o .ac-code-skill
+python scripts/design_system.py --validate      # dataset gate; non-zero exit on failure
+python scripts/design_system.py --list styles   # or palettes | fonts | products
+```
+
+It draws on bundled datasets (`data/styles.csv`, `palettes.csv`,
+`font-pairings.csv`, `product-rules.csv`) and emits pattern + section order,
+tokens as CSS variables with a **measured** contrast ratio per pair, typography
+with the correct provider import, effects, anti-patterns, and a checklist.
+
+**Two things make it trustworthy, and you must respect both.** It *measures*
+contrast rather than asserting it, and `--validate` proves the dataset's internal
+consistency (every declared font family really is in its import URL; every token
+pair clears AA). But it is a **starting spec, not gospel**: it prints its own
+match confidence, and a keyword matcher can still pick a style that misses the
+brief. If the match is weak or the result contradicts the brief, override
+(`--style/--palette/--font`) or reason from the sections below. Never ship a
+generated palette over a gradient/image without re-verifying contrast against the
+*rendered* result.
+
 ## Workflow — adjective → implementation
 
+0. **Run the generator** on the brief; keep its spec if the match is sound.
 1. **Translate the brief into vocabulary.** "Premium minimal" is not a spec.
    Resolve it into: type scale + weight contrast, palette size, whitespace ratio,
    motion budget, and the one signature moment. Ask the user for the *one* thing

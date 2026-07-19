@@ -16,6 +16,9 @@ run if it isn't there).
 .ac-code-skill/
 ├── memory.md            # the consolidated, always-current project knowledge base
 ├── docs/                # generated formal docs as Word .docx (PRD/BRD/FDD/TDD/ADR) — regenerated each run
+├── design-system/       # generated design system (only when UI work happens)
+│   ├── MASTER.md        #   global design rules: tokens, type, pattern, anti-patterns
+│   └── pages/<name>.md  #   per-page overrides; inherit everything not restated
 └── log/
     └── <run-id>/
         ├── <agent>.md   # each agent's raw report for this run

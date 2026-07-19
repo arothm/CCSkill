@@ -132,6 +132,19 @@ or build step references it.
 > type transforms) where the codebase relies on it.
 > **Cross-platform:** call out PWA / WebAssembly / native-bridge (React Native,
 > Capacitor) concerns where the code reaches for them.
+> **Design system generation (start here on any aesthetic ask):** run
+> `scripts/design_system.py "<the brief>"` (stdlib, no network) to compose a
+> concrete spec from the bundled verified datasets — layout pattern + section
+> order, style with its do-not-use-for list, colour tokens as CSS variables with a
+> **measured** WCAG ratio on every pair, typography with the *correct provider
+> import*, key effects, anti-patterns, and a pre-delivery checklist. Persist it
+> with `--persist -o .ac-code-skill` (writes `design-system/MASTER.md`) and
+> `--page <name>` for per-page overrides that inherit from MASTER. Treat the
+> output as a **starting spec, not gospel** — it reports its own match confidence;
+> if it says "no keyword match", or the chosen style contradicts the brief,
+> override with `--style/--palette/--font` or fall back to the reference below.
+> `--validate` gates the dataset itself (contrast, font-import coherence,
+> referential integrity) and should pass before you rely on it.
 > **Design sourcing & aesthetic direction (when building/restyling UI):** when the
 > ask is an aesthetic one ("premium minimal", "editorial", "make it feel
 > expensive"), follow `references/design-inspiration.md` — translate the adjective
