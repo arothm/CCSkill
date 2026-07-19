@@ -80,7 +80,8 @@ concrete, self-verified spec in one command:
 python scripts/design_system.py "premium minimal SaaS landing page"
 python scripts/design_system.py "<brief>" --persist -o .ac-code-skill   # design-system/MASTER.md
 python scripts/design_system.py "<brief>" --page checkout -o .ac-code-skill
-python scripts/design_system.py --validate      # dataset gate; non-zero exit on failure
+python scripts/design_system.py --validate      # dataset gate; non-zero exit on failure (offline)
+python scripts/design_system.py --validate --check-fonts   # + probe providers for the families
 python scripts/design_system.py --list styles   # or palettes | fonts | products
 ```
 

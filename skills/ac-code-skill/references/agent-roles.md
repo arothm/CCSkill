@@ -144,7 +144,10 @@ or build step references it.
 > if it says "no keyword match", or the chosen style contradicts the brief,
 > override with `--style/--palette/--font` or fall back to the reference below.
 > `--validate` gates the dataset itself (contrast, font-import coherence,
-> referential integrity) and should pass before you rely on it.
+> referential integrity) and should pass before you rely on it; add
+> `--check-fonts` to additionally probe each provider online and confirm the
+> families are really served (opt-in, needs network; unreachable = skipped, never
+> a failure).
 > **Design sourcing & aesthetic direction (when building/restyling UI):** when the
 > ask is an aesthetic one ("premium minimal", "editorial", "make it feel
 > expensive"), follow `references/design-inspiration.md` — translate the adjective

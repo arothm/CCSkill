@@ -59,7 +59,9 @@ output.
   typography with the correct provider import, anti-patterns, and a checklist.
   Persists as `design-system/MASTER.md` plus per-page overrides. `--validate`
   gates the dataset itself — contrast, font-import coherence, referential
-  integrity — so it can't ship an unreadable palette or a font it never imported.
+  integrity — so it can't ship an unreadable palette or a font it never imported;
+  `--check-fonts` additionally probes each provider online to confirm the families
+  are really served.
 - **Aesthetic direction** — an adjective brief ("premium minimal", "editorial")
   is translated into concrete design vocabulary and calibrated against catalogued
   reference libraries (composition, components, motion, WebGL), then implemented

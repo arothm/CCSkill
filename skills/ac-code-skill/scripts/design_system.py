@@ -22,10 +22,12 @@ USAGE
     python design_system.py "developer tool docs" --format json
     python design_system.py "analytics dashboard" --persist --output-dir .ac-code-skill
     python design_system.py "checkout flow" --persist --page checkout -o .ac-code-skill
-    python design_system.py --validate          # dataset integrity gate (CI-friendly)
+    python design_system.py --validate          # dataset integrity gate (CI-friendly, offline)
+    python design_system.py --validate --check-fonts   # + confirm providers really serve the families
+    python design_system.py --check-fonts       # font probe only (needs network)
 """
 from __future__ import annotations
-import argparse, csv, json, math, os, re, sys
+import argparse, csv, json, math, os, re, sys, urllib.error, urllib.request
 
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 AA_NORMAL, AA_LARGE, AAA_NORMAL = 4.5, 3.0, 7.0
@@ -239,7 +241,51 @@ def normalise(s):
     return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
 
 
-def validate(styles, palettes, fonts, products):
+_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
+
+
+def check_fonts_online(fonts, timeout=10):
+    """Opt-in network probe: does each declared family actually exist at its provider?
+
+    The offline validator proves internal consistency (the family is named in the
+    import URL). Only the provider can confirm the family still EXISTS. Returns
+    (failures, skipped, checked). A network problem is a `skipped`, never a
+    failure - a CI gate must not go red because a runner had no egress.
+    """
+    failures, skipped, checked = [], [], 0
+    for f in fonts:
+        if f["provider"] == "system" or not f["import_url"]:
+            continue
+        fams = [f["heading"], f["body"]] + ([f["mono"]] if f.get("mono") else [])
+        fams = list(dict.fromkeys(fams))
+        req = urllib.request.Request(f["import_url"], headers={"User-Agent": _UA})
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                body = r.read().decode("utf-8", "replace")
+                status = r.status
+        except urllib.error.HTTPError as e:
+            # 4xx from a font CDN means the family/slug is wrong - that IS a failure.
+            failures.append(f"FONT-NET  {f['id']}: provider returned HTTP {e.code} for its import_url "
+                            f"-> at least one family name/slug is wrong")
+            checked += 1
+            continue
+        except Exception as e:  # DNS, TLS, timeout, offline
+            skipped.append(f"{f['id']} ({type(e).__name__})")
+            continue
+        checked += 1
+        css = normalise(body)
+        if status != 200 or not css.strip():
+            failures.append(f"FONT-NET  {f['id']}: provider returned HTTP {status} / empty CSS")
+            continue
+        for fam in fams:
+            if normalise(fam) not in css:
+                failures.append(f"FONT-NET  {f['id']}: '{fam}' is not served by {f['provider']} "
+                                f"at this URL -> it would silently fall back")
+    return failures, skipped, checked
+
+
+def validate(styles, palettes, fonts, products, check_online=False):
     failures, checks = [], 0
 
     for p in palettes:
@@ -275,8 +321,17 @@ def validate(styles, palettes, fonts, products):
                 if ref not in table:
                     failures.append(f"REF       {r['id']}: {kind} '{ref}' does not exist")
 
+    net_note = ""
+    if check_online:
+        nf, skipped, nchecked = check_fonts_online(fonts)
+        failures += nf
+        checks += nchecked
+        net_note = f" Probed {nchecked} font import URL(s) online."
+        if skipped:
+            net_note += f" SKIPPED (unreachable, not a failure): {', '.join(skipped)}."
+
     print(f"Validated {checks} checks across {len(palettes)} palettes, {len(fonts)} font pairings, "
-          f"{len(styles)} styles, {len(products)} product rules.")
+          f"{len(styles)} styles, {len(products)} product rules.{net_note}")
     if failures:
         print(f"\n{len(failures)} FAILURE(S):")
         for x in failures:
@@ -320,13 +375,28 @@ def main(argv=None):
     ap.add_argument("--page", help="write a page override into design-system/pages/")
     ap.add_argument("--output-dir", "-o", default=".", help="where design-system/ is created")
     ap.add_argument("--validate", action="store_true", help="dataset integrity gate; non-zero exit on failure")
+    ap.add_argument("--check-fonts", action="store_true",
+                    help="ALSO probe each font import URL online to confirm the provider really serves "
+                         "those families (opt-in; needs network; unreachable = skipped, not failed)")
     ap.add_argument("--list", choices=["styles", "palettes", "fonts", "products"], help="list available ids")
     a = ap.parse_args(argv)
 
     styles, palettes, fonts, products = load("styles"), load("palettes"), load("font-pairings"), load("product-rules")
 
     if a.validate:
-        return validate(styles, palettes, fonts, products)
+        return validate(styles, palettes, fonts, products, check_online=a.check_fonts)
+    if a.check_fonts:
+        nf, skipped, nchecked = check_fonts_online(fonts)
+        print(f"Probed {nchecked} font import URL(s).")
+        if skipped:
+            print(f"  SKIPPED (unreachable, not a failure): {', '.join(skipped)}")
+        if nf:
+            print(f"\n{len(nf)} FAILURE(S):")
+            for x in nf:
+                print("  " + x)
+            return 1
+        print("All probed families are served by their declared provider.")
+        return 0
     if a.list:
         key = {"styles": ("styles", "style"), "palettes": ("palettes", "name"),
                "fonts": ("font-pairings", "name"), "products": ("product-rules", "product")}[a.list]
