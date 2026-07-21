@@ -43,6 +43,23 @@ The skill installs nothing. Two consequences:
     the coordinator and user know they weren't confirmed live. Note the missing
     MCP as a finding — knowing you couldn't render is useful information.
 
+### Connecting a browser MCP (one-time, unlocks a lot)
+
+A connected browser MCP is what lets the fleet **eyeball the UI**, **drive real
+end-to-end flows and read the console**, and **browse the component catalogues**
+(`design-inspiration.md`). It's the single highest-leverage thing to enable. In
+Claude Code, add a Playwright MCP server — for example:
+
+```
+claude mcp add playwright -- npx @playwright/mcp@latest
+```
+
+Then restart/reload so it registers. Once present, the `frontend`, `tester`, and
+`ai-engineer` agents detect it and use it automatically; nothing else changes.
+Verify with `/mcp` (it should list the server). Without it, everything still
+works — the fleet just labels visual/flow findings "unverified (no browser)"
+rather than pretending it rendered them.
+
 ## Policy 3 — Reconnaissance-then-action (for anything browser-driven)
 
 The most common browser-automation bug is acting before the page is ready. So:

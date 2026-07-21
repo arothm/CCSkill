@@ -140,6 +140,12 @@ or build step references it.
 > type transforms) where the codebase relies on it.
 > **Cross-platform:** call out PWA / WebAssembly / native-bridge (React Native,
 > Capacitor) concerns where the code reaches for them.
+> **Simplify without losing behaviour:** actively look for code that could be
+> **fewer lines with identical functionality** — needless intermediates, duplicated
+> branches that collapse, hand-rolled logic a platform/std primitive already does —
+> and report it as a `code-simplification` finding. Hard rule: prove equivalence
+> (same inputs → same outputs, tests still green) and never trade a handled edge
+> case or real readability for brevity. "Shorter" that drops a case is a regression.
 > **Design system generation (start here on any aesthetic ask):** run
 > `scripts/design_system.py "<the brief>"` (stdlib, no network) to compose a
 > concrete spec from the bundled verified datasets — layout pattern + section
@@ -330,6 +336,27 @@ or build step references it.
 > review the delivery pipeline, IaC, and manifests at this same caliber and
 > report findings.
 >
+> **First-run consent (before anything server-side).** On the first run, if
+> memory has no recorded server and no `devops-consent` decision, **ask the user
+> once** whether they want the fleet to own DevOps/server operations. Record the
+> answer in memory's *Project preferences*: if **no**, do not dispatch `devops`
+> for server work on later runs (still review pipeline/IaC in-repo); if **yes**,
+> obtain access **by SSH key, never a password** — ask for the host, user, and the
+> path to an SSH key, connect verbosely (`ssh -v`) to confirm reachability, and
+> record **only the host, user and key *path*** in memory's *Infra & deploy*
+> (pointers, never secret values — the privacy gate BLOCKs a key or password). If
+> the user only has password access, guide them to install a key
+> (`ssh-copy-id`) rather than storing a password anywhere; a stored root password
+> violates the fleet's own `secrets-in-env` standard.
+>
+> **Routine maintenance (ongoing, not just at audit).** Beyond the audit, keep the
+> machine healthy: apply routine low-risk OS/security patches and tool updates
+> (surfacing — never auto-applying — kernel upgrades or anything needing a reboot),
+> and turn the resource picture (disk/inode growth, memory/swap pressure, load vs
+> cores, the heaviest processes) into concrete performance-tuning recommendations
+> (right-size a service, add swap, tune a pool, move a hot path). Reboots, and any
+> update that requires one, stop and ask.
+>
 > **Server operations (when a host is in scope).** You have full authority over
 > the VPS for reversible routine operations, under one discipline: **audit
 > read-only first, change deliberately.** Start with
@@ -400,7 +427,15 @@ or build step references it.
 > writer). Stage the markdown sources under `.ac-code-skill/log/<run-id>/docs-src/`
 > (for diffing/regeneration), so `docs/` holds **only the Word files**. Driven by
 > memory + the merged review report + the code (verify against the code, don't
-> invent). Runs automatically after review and again after approved fixes.
+> invent).
+> **Ask which docs first — don't generate the whole set unbidden.** On the first
+> docs run, if memory's *Project preferences* has no `docs-types` choice, present
+> the menu — **PRD** (product requirements), **BRD** (business requirements),
+> **FDD** (functional design), **TDD** (technical design), **ADRs** (decision
+> records) — say in one line what each is for, and ask which the user wants. Record
+> the selection in *Project preferences* and generate **only those** on this and
+> every later run, until the user changes it. Then refresh the chosen set
+> automatically after review and again after approved fixes.
 >
 > Produce/refresh, as applicable, one `.docx` each: **PRD** (goal, users, scope,
 > non-goals, success metrics), **BRD** (business value, stakeholders, cost/risk

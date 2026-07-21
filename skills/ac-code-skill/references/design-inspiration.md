@@ -59,6 +59,20 @@ so the result doesn't look stock. Effect-heavy blocks still have to clear the
 performance budget and `prefers-reduced-motion` — measure LCP/INP after adding
 one.
 
+**Browse them live when a browser MCP is connected.** With a Playwright/browser
+MCP (setup in `testing-harness.md`), the `frontend` agent can actually navigate
+these catalogues — `ui.aceternity.com/components`, `reactbits.dev`,
+`magicui.design`, `ui.shadcn.com`, `react-icons.github.io/react-icons`,
+`fonts.google.com` — view the components against the user's brief, and pull the
+ones that fit. The point of doing this per-project is **variety**: pick and adapt
+components that match *this* user's ask instead of emitting the same template for
+everyone. Then two things bind the result: **licence** — only copy what the
+component's licence permits, and record it; and **adaptation** — restyle to the
+project's own tokens and often recombine, so it reads as designed *for this
+product*, not pasted in (which is also how a hundred users of this skill avoid
+shipping the same-looking site). Without a browser MCP, work from the catalogue
+above and the distilled knowledge below, and say which you did.
+
 ### 2. Watermelon UI (`ui.watermelon.sh`) — component & block implementation
 An **open-source, copy-paste component registry**: 260+ React components,
 dashboards, and blocks built on **React 19 + Tailwind v4 + Radix UI + Framer

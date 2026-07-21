@@ -109,6 +109,14 @@ also flags **AI/LLM signals** (SDKs like `anthropic`/`openai`, `langchain`/
 include `ai-engineer`. Record verified stack + commands + dependency inventory +
 whether the repo has AI features into memory so no later agent re-derives them.
 
+**On the first run, ask the one-time preferences — don't guess them** (see
+`stack-detection.md` §0b). In a short batched prompt: is the project
+**private/internal or commercial/public** (drives the noindex vs privacy-policy
+standards); which **docs** the user wants (the `docs` menu); and — if a server may
+be in scope — whether the fleet should **own DevOps** (the `devops` consent flow,
+SSH-key only). Record all of it in memory's *Project preferences* and honour it on
+every later run without re-asking.
+
 ### Step 2 — Select the agents and confirm
 
 Seven role-shaped agents, each a **principal/staff-level engineer** for its
@@ -175,10 +183,12 @@ findings by severity (not by agent), deduplicate shared root causes, keep
 have a second agent already in the run independently re-derive it from source**
 — unreproduced findings ship as warnings labelled "single-agent, unconfirmed"
 (shared-rules rule 1), because a blocking finding stops merges and deploys.
-Run the merged report through `scripts/redact.py --strict`, then save it to
-`.ac-code-skill/log/<run-id>/report.md`. Consolidate the agents' Memory deltas
-into `memory.md` — through the same privacy gate — and file their *Improvements*
-under *Agent learnings*.
+Run the merged report through `scripts/redact.py --strict`, then **deliver it in
+both places: save the full report to `.ac-code-skill/log/<run-id>/report.md` AND
+render the full report into the chat** (not just a summary — see
+`report-format.md`). Consolidate the agents' Memory deltas into `memory.md` —
+through the same privacy gate — and file their *Improvements* under *Agent
+learnings*.
 
 Each agent also returns up to **3 forward-looking enhancements** (see the shared
 caliber rules in `references/agent-roles.md`) — improvements that aren't defects.
@@ -189,16 +199,18 @@ a **quick diff-check**, tell agents to skip enhancements and omit the section �
 there the user wants defects only, not a roadmap. **Do not hand the report to the
 user yet — generate docs first (Step 4).**
 
-### Step 4 — Docs (automatic, then deliver the report)
+### Step 4 — Docs (then deliver the report)
 
-As soon as the review is merged, dispatch the `docs` agent to generate or refresh
-the project's docs into `.ac-code-skill/docs/` — PRD, BRD, FDD, TDD, and ADRs —
-built from memory + the merged report + the code (verified, not invented). Docs
-are delivered as **Microsoft Word (`.docx`)** files, rendered via the bundled
-`scripts/md_to_docx.py` helper (zero-dependency; uses `pandoc` if present). Then
-present the report summary to the user inline and point them to both
-`.ac-code-skill/log/<run-id>/report.md` and the refreshed `.docx` docs. This is
-the default flow; only skip it if the user explicitly says they don't want docs.
+Once the review is merged, dispatch the `docs` agent to generate or refresh the
+project's docs into `.ac-code-skill/docs/`, built from memory + the merged report
++ the code (verified, not invented). **Generate only the doc types the user
+chose** — on the first docs run the agent presents the menu (PRD / BRD / FDD / TDD
+/ ADRs, one line each) and records the selection in *Project preferences*;
+thereafter it refreshes exactly that set (see the `docs` brief). Docs are
+delivered as **Microsoft Word (`.docx`)** via `scripts/md_to_docx.py`
+(zero-dependency; uses `pandoc` if present). Then deliver the report per Step 3 —
+full report in chat and on disk — and point to the refreshed `.docx` docs. Skip
+docs only if the user opted out.
 
 ### Step 5 — Fix phase (only after approval), then update docs
 
@@ -224,14 +236,24 @@ rather than the pre-fix state. Tell the user which docs changed.
 
 ### Step 6 — Deploy phase (auto, with rollback)
 
-**Server operations.** When a VPS is in scope, `devops` also owns the machine
-itself per `references/vps-operations.md`: it audits **read-only first**
+**Server ownership is consent-gated.** Check *Project preferences* → `devops-consent`.
+If it's `no`, don't dispatch `devops` for server work (in-repo pipeline/IaC review
+still happens). If it's `unasked` and a server may be in scope, ask once whether
+the fleet should own DevOps; on **yes**, take access **by SSH key, never a
+password** (host + user + key *path*, verified with `ssh -v`, recorded as pointers
+only — see the `devops` brief and `references/vps-operations.md`), on **no**, record
+it and move on.
+
+**Server operations.** When a VPS is in scope and consented, `devops` owns the
+machine per `references/vps-operations.md`: it audits **read-only first**
 (`scripts/server_audit.py --script`, run over SSH, output captured and triaged
 with `--parse`) across access, network exposure, patching, TLS, resources,
-services, containers, logging and backups — then proposes changes. Reversible
-routine operations proceed; anything destructive, irreversible, or capable of
-severing access stops and asks. It never weakens a security control to make
-something work.
+services, containers, logging and backups — then proposes changes and performs
+**routine maintenance** (apply low-risk updates, tool upgrades, and turn the
+resource picture into performance tuning; reboots and kernel upgrades stop and
+ask). Reversible routine operations proceed; anything destructive, irreversible,
+or capable of severing access stops and asks. It never weakens a security control
+to make something work.
 
 If the user asked to ship, run the `devops` agent per
 `references/deploy.md`: it verifies every precondition (security gate, migration

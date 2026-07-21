@@ -33,7 +33,7 @@ security scanning use MCP connectors or tools you already have, with graceful fa
 | **Cyber Security** | AppSec Architect | logic flaws beyond scanners, crypto engineering, CI security gates, identity, supply chain (SBOM/SLSA), secrets, PII |
 | **Tester** | Quality Architect (SDET) | all testing (unit/integration/e2e, both layers), suite strategy, flakiness root-causing, contract/perf/chaos, coverage, test authoring |
 | **DevOps** | Platform Architect / SRE | delivery pipeline, IaC, observability-as-code, deploy + auto-rollback, and **full VPS ownership** — audit, harden, operate, incidents |
-| **Docs** | Documentation Architect | PRD/BRD/FDD/TDD/ADR as **Word `.docx`**, auto-generated after review and updated after fixes |
+| **Docs** | Documentation Architect | the doc types you choose (PRD/BRD/FDD/TDD/ADR) as **Word `.docx`**, generated after review and updated after fixes |
 | **AI Agent Engineer** | Agentic Systems Architect | prompts & injection defence, agent/RAG architecture, evals, model choice, token cost, guardrails — *dispatched only when the repo has AI features* |
 
 Each reasons like a principal engineer: it catches the *class* of bug and the scaling cliff a
@@ -49,7 +49,7 @@ Not sure who owns something? `python scripts/standards.py --who "rate limiting o
 1. Detect      stack, real commands, dependencies, AI signals — or greenfield → interview
 2. Select      only the agents this repo and this request actually need
 3. Review      selected agents run in parallel, read-only → one merged report
-4. Docs        .docx generated automatically, then the report is delivered
+4. Docs        the doc types you chose, as .docx; then the full report is delivered (chat + file)
 5. Fix         approved batches only → docs regenerate afterwards
 6. Deploy      health-checked, auto-rollback; destructive actions stop and ask
 ```
@@ -61,6 +61,7 @@ Not sure who owns something? `python scripts/standards.py --who "rate limiting o
 | **Full run** | `run ac-code-skill` | the whole pipeline, stopping only at approval gates |
 | **Targeted** | "audit security", "check my tests" | only the matching agents |
 | **Greenfield** | empty repo | per-role intake interview → docs → scaffold |
+| **First-run setup** | first run on a repo | asks *once*, then remembers: private or commercial? which docs? should the fleet own DevOps? |
 | **Record** | `ac-code-skill record "<what happened>"` | captures out-of-band work (a hand fix, a deploy, an incident) into memory. A skill is instructions for a turn, not a daemon — this is how work done outside a run still reaches the next one |
 | **Continuous** | optional hooks | prime memory at session start, refuse a commit carrying a secret, typecheck on edit |
 
@@ -69,13 +70,22 @@ Not sure who owns something? `python scripts/standards.py --who "rate limiting o
 - **It verifies instead of asserting.** Contrast is *computed*; font imports are *probed
   against the provider*; a `blocking` finding needs independent reproduction by a second
   agent. The validators exit non-zero, so they're CI-usable.
-- **36 enforced standards** — each owned by exactly one agent and carrying a **`verify`
+- **37 enforced standards** — each owned by exactly one agent and carrying a **`verify`
   column stating how to prove it**, because a rule you cannot check is a wish. Skeleton
   loaders over spinners, a label on every input, no N+1, rate limiting, per-user AI token
   caps, semantic HTML, privacy policy on commercial work, secrets only in a gitignored
   `.env`, key-only SSH, default-deny firewall, no public datastores, restore-**tested**
   backups, HSTS/HTTP-3, and more. Context-gated: private work gets `noindex`, commercial
-  gets a privacy policy.
+  gets a privacy policy — and this **private-vs-commercial choice is asked once, not
+  guessed**.
+- **The report lands in two places** — the full report is rendered in the chat *and*
+  saved as `.ac-code-skill/log/<run-id>/report.md`, not buried behind a file link.
+- **Sees the UI when a browser MCP is connected.** With a Playwright/browser MCP, the
+  Frontend agent renders and eyeballs pages at every breakpoint, the Tester agent drives
+  real end-to-end flows and reads the console, and the design work can browse component
+  catalogues (shadcn/Aceternity/Magic UI/React Bits) and adapt licensed pieces to your
+  tokens — so a hundred users don't ship the same-looking site. Without it, findings are
+  labelled "unverified (no browser)" rather than faked.
 - **Retrieved memory, not bulk-loaded.** Memory and docs grow without bound. `recall.py`
   returns a pinned core plus task-matched sections — measured at **7% of a 219 KB corpus**
   on a real repo — and *lists what it omitted*, so nothing is silently dropped.
@@ -83,10 +93,13 @@ Not sure who owns something? `python scripts/standards.py --who "rate limiting o
   applied before anything is persisted. `file:line` and public URLs are PASS-classed so
   findings stay reproducible; internal IPs are hashed so they stay correlatable without
   publishing your topology.
-- **Full server ownership.** DevOps audits a VPS **read-only first** across 9 categories
-  (access, network exposure, patching, TLS, resources, services, containers, logging,
-  backups), then changes deliberately: know the undo before the do, one change at a time,
-  never weaken a control to make something work, stop and ask for anything irreversible.
+- **Full server ownership — opt-in.** On first run DevOps asks whether the fleet should
+  own the server (remembered either way), and takes access **by SSH key, never a stored
+  password**. It then audits a VPS **read-only first** across 9 categories (access, network
+  exposure, patching, TLS, resources, services, containers, logging, backups), performs
+  routine maintenance (updates, tool upgrades, performance tuning), and changes
+  deliberately: know the undo before the do, one change at a time, never weaken a control
+  to make something work, stop and ask for anything irreversible.
 - **Living docs as Word files**, regenerated after fixes so they never drift from the code.
 - **Design system generation** from a plain-language brief — layout pattern, tokens with a
   *measured* WCAG ratio per pair, typography with the correct provider import, a

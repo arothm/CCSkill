@@ -131,6 +131,11 @@ _Last updated: <date> by coordinator (run <run-id>)_
 ## Project overview
 - What this project is, in 2-3 lines.
 
+## Project preferences (asked once, then honoured — the user can change them)
+- context: <private | commercial>  (drives noindex vs privacy-policy standards)
+- docs-types: <e.g. PRD, TDD, ADR — the set the user chose; generate only these>
+- devops-consent: <yes | no | unasked>  (no ⇒ never dispatch devops for server work)
+
 ## Stack & commands (verified)
 - Frontend: <framework> · test: `<cmd>` · lint: `<cmd>` · build: `<cmd>` · e2e: `<cmd>`
 - Backend: <framework> · test: `<cmd>` · lint: `<cmd>` · e2e: `<cmd>`
@@ -160,6 +165,7 @@ _Last updated: <date> by coordinator (run <run-id>)_
 - Confirmed-unused deps (declared, never imported): <...>.
 
 ## Infra & deploy
+- Server access (pointers only): host, user, SSH key *path* on this machine. NEVER a key or password.
 - Host/OS, deploy method, health-check URL, rollback method (locations, not secrets).
 - Server-maintenance state: pending patches, cert expiry, reboot-required.
 

@@ -46,8 +46,13 @@ and terse; per-run findings belong in the report, not in memory.
 
 ## The merged report (you write this)
 
-Save as `.ac-code-skill/log/<run-id>/report.md` (and show the summary inline to
-the user). Use this template:
+**Deliver the report in two places, both times.** Save the full report to
+`.ac-code-skill/log/<run-id>/report.md` **and** render the full report into the
+chat — not just a summary. The file is the durable artefact; the chat copy is what
+the user actually reads, and burying it behind a "see the file" link is a worse
+experience. (For a very large report, lead the chat copy with the verdict + counts
+so the top is skimmable, then the full grouped findings below.) Use this template
+for both: 
 
 ```markdown
 # AC Code Skill — Review Report

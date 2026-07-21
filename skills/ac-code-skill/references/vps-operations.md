@@ -18,6 +18,23 @@ picture, report it, and only then propose changes.
 
 Never explore by mutating. `systemctl restart` is not a diagnostic.
 
+## Consent and access (first run)
+
+Server ownership is opt-in and asked **once**. If memory has no server and no
+`devops-consent` decision recorded in *Project preferences*:
+
+- **Ask the user** whether they want the fleet to own DevOps/server operations. If
+  **no**, record that and don't dispatch `devops` for server work again (in-repo
+  pipeline/IaC review still happens). If **yes**, continue.
+- **Access is by SSH key, never a password.** Ask for the host, the user, and the
+  **path to an SSH key**, then connect verbosely (`ssh -v user@host`) to confirm
+  reachability and record what worked. If the user only has a password, walk them
+  through installing a key (`ssh-copy-id`) — do **not** accept or store a password.
+  A stored root password would violate the fleet's own `secrets-in-env` standard
+  and is exactly what the privacy gate BLOCKs.
+- **Persist pointers, not secrets.** Into memory's *Infra & deploy*: host, user,
+  and the key's *path on this machine*. Never the key material, never a password.
+
 ## Access and evidence
 
 - **Credentials come from the environment, never from you.** SSH key path, host
@@ -83,6 +100,24 @@ skewed clocks corrupt correlation and break TLS/tokens).
 Do backups exist, are they *current*, are they **off-box**, and has a restore
 been *tested*? An untested backup is a hypothesis. Report an untested backup as a
 finding regardless of how healthy the backup job looks.
+
+## Routine maintenance
+
+Owning the machine means keeping it healthy over time, not only auditing it once.
+As approved ongoing operations (each still under the change discipline below):
+
+- **Patch and update.** Apply routine low-risk OS and security updates and tool
+  upgrades. A kernel upgrade, or anything that needs a reboot, is **surfaced and
+  scheduled with the user — never auto-applied**; a patched-but-not-rebooted
+  kernel is not patched.
+- **Tune for performance from the resource picture.** Turn what the audit found
+  into concrete recommendations: a service to right-size, a connection pool to
+  bound, swap to add, a hot process to move or cap, a filesystem whose *growth
+  rate* (not just current %) will exhaust it. Name the expected effect and the
+  cost, ADR-style — don't tune blind.
+- **Keep the hygiene jobs working.** Confirm log rotation, cert renewal,
+  unattended-upgrades and backups are still *running and effective*, not merely
+  installed. The most common outage is a boring job that silently stopped.
 
 ## Change discipline
 

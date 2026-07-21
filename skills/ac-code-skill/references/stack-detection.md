@@ -14,6 +14,21 @@ hand back to the coordinator's greenfield bootstrap** (SKILL.md) — the fleet
 interviews the user and scaffolds instead of reviewing an empty tree. Everything
 below assumes there's existing code.
 
+## 0b. Project context — ask, don't guess
+
+Several standards are context-gated: a **private/internal/personal** project must
+ship `noindex`, and a **commercial/public** one must ship a privacy policy. Getting
+this wrong is costly in both directions (a private tool indexed by Google, or a
+commercial site with no privacy policy), so **ask the user once rather than
+inferring it**: *"Is this project private/internal, or commercial/public?"*
+
+Record the answer in memory's *Project preferences* (`context: private|commercial`)
+and pass it to every agent as `standards.py --context <value>`. Once recorded, it
+drives the gated standards on this and every later run without asking again — the
+user can change it. While you're asking, this is the natural moment to capture the
+other one-time preferences too (which docs the user wants — see the `docs` brief;
+whether the fleet should own DevOps — see the `devops` brief).
+
 ## 1. Find the subprojects
 
 Start by listing the repo root and looking one or two levels deep for the signal
